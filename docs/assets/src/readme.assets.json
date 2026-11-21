@@ -76,7 +76,7 @@
       "slug": "gate",
       "kind": "pipeline",
       "why": "The check is three ordered steps of one command, and each one fails the build on its own, so a pipeline is its real shape.",
-      "label": "How go-lint runs. Your repository's check command calls vlint through go run at a pinned version, in three steps. First vlint golangci -check builds .golangci.yml from the shared config plus your overlay and fails when the committed file drifts. Then vlint ./... runs the seven analyzers: layout, clockseam, envroot, errstring, noskipenv, doccomment and adrref. Last, golangci-lint runs with the generated config. Any step that finds something fails the check.",
+      "label": "How go-lint runs. Your repository's check command calls vlint, pinned in mise.toml, in three steps. First vlint golangci -check builds .golangci.yml from the shared config plus your overlay and fails when the committed file drifts. Then vlint ./... runs the seven analyzers: layout, clockseam, envroot, errstring, noskipenv, doccomment and adrref. Last, golangci-lint runs with the generated config. Any step that finds something fails the check.",
       "gap": 96,
       "cards": [
         {
@@ -130,7 +130,7 @@
         }
       ],
       "footer": {
-        "title": "make check",
+        "title": "mise run check",
         "sub": "any finding fails",
         "under": 1,
         "label": "one command"

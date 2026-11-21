@@ -116,7 +116,27 @@ func TestGeneratedConfigVerifies(t *testing.T) {
 	if err := golangci.Write(dir); err != nil {
 		t.Fatal(err)
 	}
-	if out, err := exec.Command(bin, "config", "verify", "-c", filepath.Join(dir, golangci.ConfigFile)).CombinedOutput(); err != nil {
-		t.Fatalf("golangci-lint config verify: %v\n%s", err, out)
+	for _, name := range []string{golangci.ConfigFile, golangci.FastConfigFile} {
+		if out, err := exec.Command(bin, "config", "verify", "-c", filepath.Join(dir, name)).CombinedOutput(); err != nil {
+			t.Fatalf("golangci-lint config verify %s: %v\n%s", name, err, out)
+		}
+	}
+}
+
+func TestGenerateFastDropsOnlyTheHeavyLinters(t *testing.T) {
+	out, err := golangci.GenerateFast([]byte("exclusions:\n  rules:\n    - path: 'x/'\n      linters: [gosec]\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(out)
+	for _, gone := range []string{"- gosec", "- contextcheck", "- sloglint", "- testifylint", "sloglint:", "gosec:", "path: 'x/'"} {
+		if strings.Contains(text, gone) {
+			t.Errorf("fast config still has %q", gone)
+		}
+	}
+	for _, kept := range []string{"- staticcheck", "- govet", "staticcheck:", "one-logger:"} {
+		if !strings.Contains(text, kept) {
+			t.Errorf("fast config lost %q", kept)
+		}
 	}
 }

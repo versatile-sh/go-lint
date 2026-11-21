@@ -34,6 +34,10 @@ func main() {
 			os.Exit(config(os.Args[2:]))
 		case "fix":
 			os.Exit(fix(os.Args[2:]))
+		case "changed":
+			os.Exit(changedTier(os.Args[2:]))
+		case "fast":
+			os.Exit(fastTier(os.Args[2:]))
 		}
 	}
 	if len(os.Args) == 2 && strings.HasSuffix(os.Args[1], ".cfg") {
@@ -53,7 +57,7 @@ func lint(args []string) int {
 		only[a] = fs.Bool(a.Name, false, "run only the analyzers set true, or all but those set false: "+a.Doc)
 	}
 	fs.Usage = func() {
-		fmt.Fprintln(fs.Output(), "usage: vlint [flags] packages | vlint golangci [-check] | vlint fix [packages]")
+		fmt.Fprintln(fs.Output(), "usage: vlint [flags] packages | vlint golangci [-check] | vlint fix [packages] | vlint changed [flags] | vlint fast [-fix] files")
 		fs.PrintDefaults()
 	}
 	_ = fs.Parse(args)
