@@ -73,7 +73,12 @@ func runRevive(dirs []string, all bool) int {
 		fmt.Fprintln(os.Stderr, "vlint: not in a git repository")
 		return 1
 	}
-	cfg := filepath.Join(strings.TrimSpace(string(top)), golangci.ReviveFile)
+	start, err := filepath.Abs(dirs[0])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "vlint:", err)
+		return 1
+	}
+	cfg := findConfig(start, strings.TrimSpace(string(top)), golangci.ReviveFile)
 	if _, err := os.Stat(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "vlint: %s missing: run vlint golangci\n", golangci.ReviveFile)
 		return 1

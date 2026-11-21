@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
 
 func TestPositionParsesUnixFormat(t *testing.T) {
 	file, n, ok := position("service/live.go:42:7: [var-naming] type fakeIdP should be fakeIDP")
@@ -21,5 +25,24 @@ func TestWithinCountsEveryLineOfANewFile(t *testing.T) {
 		if got := within(spans, n); got != want {
 			t.Errorf("line %d: got %v, want %v", n, got, want)
 		}
+	}
+}
+
+func TestFindConfigPrefersTheNearestModuleRoot(t *testing.T) {
+	top := t.TempDir()
+	nested := filepath.Join(top, "server", "pkg")
+	if err := os.MkdirAll(nested, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := findConfig(nested, top, ".revive.toml"), filepath.Join(top, ".revive.toml"); got != want {
+		t.Fatalf("no config anywhere: got %s, want %s", got, want)
+	}
+	for _, dir := range []string{top, filepath.Join(top, "server")} {
+		if err := os.WriteFile(filepath.Join(dir, ".revive.toml"), nil, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got, want := findConfig(nested, top, ".revive.toml"), filepath.Join(top, "server", ".revive.toml"); got != want {
+		t.Fatalf("got %s, want %s", got, want)
 	}
 }
