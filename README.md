@@ -36,15 +36,15 @@ go-lint is a versioned Go module with one command, `vlint`. A repository runs it
 From the root of a Go module, with Go 1.27 and golangci-lint 2.15:
 
 ```sh
-go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 golangci
-go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 ./...
+go run github.com/versatile-sh/go-lint/cmd/vlint@v0.2.0 golangci
+go run github.com/versatile-sh/go-lint/cmd/vlint@v0.2.0 ./...
 golangci-lint run ./...
 ```
 
 The first line writes `.golangci.yml`. The second prints one line per finding as `file:line:col: message` and exits non-zero when there is any. Wire both into the check command:
 
 ```make
-VLINT := go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1
+VLINT := go run github.com/versatile-sh/go-lint/cmd/vlint@v0.2.0
 
 check:
 	$(VLINT) golangci -check
@@ -71,7 +71,7 @@ Run only some analyzers with their flags, for example `vlint -layout -errstring 
 Apply the safe fixes only:
 
 ```sh
-go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 fix ./...
+go run github.com/versatile-sh/go-lint/cmd/vlint@v0.2.0 fix ./...
 ```
 
 It runs `golangci-lint run --fix --enable-only errorlint` and then `golangci-lint fmt` (gofmt and goimports). Turning `%v` into `%w` makes wrapped errors visible to `errors.Is`, so run the tests afterwards.
