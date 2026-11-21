@@ -87,6 +87,15 @@ vlint -baseline lint/vlint-baseline.txt ./...          # in make check
 
 Each baseline line is the module-relative file, the analyzer, a hash of the reported source line (whitespace collapsed) and the message. There is no line number, so edits elsewhere in a file do not disturb it; editing the reported line itself makes its finding new, which asks for the fix. Repeated identical lines count one finding each. The check prints `N new findings`, exits 3 when N > 0, and lists the entries that no longer occur as `fixed:` without failing; rerun with `-write` to shrink the file. Use the same flags (`-tags`, analyzer flags) when writing and checking. A package that fails to load fails the run, so a broken tree never passes as clean.
 
+For golangci-lint, set a merge base in the overlay and regenerate; golangci-lint then reports only issues on lines changed since that ref:
+
+```yaml
+issues:
+  new-from-merge-base: origin/main
+```
+
+This gate is diff-based, not key-based: it needs the git history and the ref present locally (fetch `origin/main` in a shallow CI clone), and it checks nothing on the base branch itself. Run the full `golangci-lint run` when you want the whole debt.
+
 ### The folder layout
 
 Paths are relative to the Go module root.
@@ -105,7 +114,7 @@ Test files may import anything except `cmd/`. These folder names are reported wh
 
 ## Configuration
 
-A repository adds rules in `lint/golangci.local.yml`, then runs `vlint golangci` to regenerate. The overlay accepts two keys only:
+A repository adds rules in `lint/golangci.local.yml`, then runs `vlint golangci` to regenerate. The overlay accepts three keys only, `exclusions`, `depguard` and `issues.new-from-merge-base` (see the gate above):
 
 ```yaml
 exclusions:
