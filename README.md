@@ -76,6 +76,17 @@ go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 fix ./...
 
 It runs `golangci-lint run --fix --enable-only errorlint` and then `golangci-lint fmt` (gofmt and goimports). Turning `%v` into `%w` makes wrapped errors visible to `errors.Is`, so run the tests afterwards.
 
+### The "don't get worse" gate
+
+A repository that cannot reach zero findings in one change commits a baseline and fails only on new findings:
+
+```sh
+vlint -baseline lint/vlint-baseline.txt -write ./...   # record today's findings
+vlint -baseline lint/vlint-baseline.txt ./...          # in make check
+```
+
+Each baseline line is the module-relative file, the analyzer, a hash of the reported source line (whitespace collapsed) and the message. There is no line number, so edits elsewhere in a file do not disturb it; editing the reported line itself makes its finding new, which asks for the fix. Repeated identical lines count one finding each. The check prints `N new findings`, exits 3 when N > 0, and lists the entries that no longer occur as `fixed:` without failing; rerun with `-write` to shrink the file. Use the same flags (`-tags`, analyzer flags) when writing and checking. A package that fails to load fails the run, so a broken tree never passes as clean.
+
 ### The folder layout
 
 Paths are relative to the Go module root.
