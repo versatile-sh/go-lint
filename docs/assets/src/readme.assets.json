@@ -2,7 +2,7 @@
   "name": "go-lint",
   "pitch": ["One lint kit for ", "every Go repository", "."],
   "sub": "The same rules, the same config, checked the same way everywhere.",
-  "badge": "GPL-3.0-or-later",
+  "badge": "MIT",
   "tags": ["golangci-lint config", "drift check", "7 analyzers", "safe fixes only", "go run, no install"],
   "heroLabel": "go-lint: one lint kit for every Go repository. The same rules, the same config, checked the same way everywhere.",
   "sections": [
