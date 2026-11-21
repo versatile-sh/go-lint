@@ -1,6 +1,9 @@
 package port
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestGet(t *testing.T) {
 	// a test comment // want `inline comment`
@@ -11,3 +14,17 @@ func TestGet(t *testing.T) {
 type fake struct{}
 
 func TestExportedWithoutDoc(t *testing.T) { _ = fake{} }
+
+func ExampleLong() {
+	fmt.Println("ok")
+	// Output:
+	// ok
+}
+
+func ExampleMissing() {
+	fmt.Println("b")
+	fmt.Println("a")
+	// Unordered output:
+	// a
+	// b
+}
