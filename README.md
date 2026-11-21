@@ -132,8 +132,10 @@ Open an issue or a pull request. A new rule comes with its analyzer, its `analys
 
 ## License
 
-Copyright (C) 2026 Versatile (versatile.sh).
+Copyright (C) 2026 Versatile (versatile.sh)
 
-go-lint is free software: you can redistribute it and modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed without any warranty; see [`LICENSE`](LICENSE) for the full terms.
+go-lint is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE).
 
-A commercial license, for use under terms other than the GPL, is available from Versatile at <https://versatile.sh>.
+For a commercial licence without the GPL's obligations, contact Versatile through [versatile.sh/contact](https://versatile.sh/contact).
+
+Contributions are accepted under the CLA, see [CONTRIBUTING.md](CONTRIBUTING.md).
