@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+// Order is placed per ADR-0007.
+message Order {
+  string note = 1 [json_name = "see_adr_12"];
+  /* Totals follow
+     docs/adr/0003-money.md */
+  int64 total = 2; // plain comment
+  string url = 3; // "quoted // ADR-9" inside a comment still counts
+}

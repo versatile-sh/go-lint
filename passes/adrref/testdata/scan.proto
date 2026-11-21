@@ -1,0 +1,4 @@
+// ADR-1
+message M { string s = 1 [default = "ADR-2 // x"]; }
+/* adrs/
+ */ // fine

@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/versatile-sh/go-lint/golangci"
+	"github.com/versatile-sh/go-lint/internal/baseline"
 	"github.com/versatile-sh/go-lint/internal/driver"
 	"github.com/versatile-sh/go-lint/passes/adrref"
 	"github.com/versatile-sh/go-lint/passes/clockseam"
@@ -44,6 +46,8 @@ func lint(args []string) int {
 	fs := flag.NewFlagSet("vlint", flag.ExitOnError)
 	tags := fs.String("tags", "", "comma-separated build tags, passed to package loading")
 	tests := fs.Bool("test", true, "analyze test files too")
+	base := fs.String("baseline", "", "fail only on findings missing from this baseline file; list the ones fixed")
+	write := fs.Bool("write", false, "with -baseline, record the current findings in the baseline file")
 	only := map[*analysis.Analyzer]*bool{}
 	for _, a := range analyzers {
 		only[a] = fs.Bool(a.Name, false, "run only the analyzers set true, or all but those set false: "+a.Doc)
@@ -61,10 +65,36 @@ func lint(args []string) int {
 		return 0
 	}
 	run := selected(fs, only)
-	findings, err := driver.Run(run, fs.Args(), driver.Options{Tags: *tags, Tests: *tests})
+	findings, err := analyze(run, fs.Args(), driver.Options{Tags: *tags, Tests: *tests})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "vlint:", err)
 		return 1
+	}
+	switch {
+	case *base == "" && *write:
+		fmt.Fprintln(os.Stderr, "vlint: -write needs -baseline <file>")
+		return 1
+	case *write:
+		if err := baseline.Write(*base, findings); err != nil {
+			fmt.Fprintln(os.Stderr, "vlint:", err)
+			return 1
+		}
+		fmt.Fprintf(os.Stderr, "vlint: %d findings recorded in %s\n", len(findings), *base)
+		return 0
+	case *base != "":
+		fresh, fixed, err := baseline.Compare(*base, findings)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "vlint:", err)
+			return 1
+		}
+		for _, key := range fixed {
+			fmt.Fprintln(os.Stderr, "fixed:", strings.ReplaceAll(key, "\t", " "))
+		}
+		if len(fixed) > 0 {
+			fmt.Fprintf(os.Stderr, "vlint: %d baseline entries no longer occur: rerun with -write to shrink %s\n", len(fixed), *base)
+		}
+		findings = fresh
+		fmt.Fprintf(os.Stderr, "vlint: %d new findings against %s\n", len(fresh), *base)
 	}
 	for _, f := range findings {
 		fmt.Println(f)
@@ -73,6 +103,24 @@ func lint(args []string) int {
 		return 3
 	}
 	return 0
+}
+
+func analyze(run []*analysis.Analyzer, patterns []string, opts driver.Options) ([]driver.Finding, error) {
+	findings, modules, err := driver.Run(run, patterns, opts)
+	if err != nil || !slices.Contains(run, adrref.Analyzer) {
+		return findings, err
+	}
+	for _, m := range modules {
+		ps, err := adrref.Proto(m)
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range ps {
+			findings = append(findings, driver.Finding{Module: m, File: p.File, Line: p.Line, Col: p.Col, Analyzer: adrref.Analyzer.Name, Message: adrref.Message})
+		}
+	}
+	driver.Sort(findings)
+	return findings, nil
 }
 
 func selected(fs *flag.FlagSet, only map[*analysis.Analyzer]*bool) []*analysis.Analyzer {

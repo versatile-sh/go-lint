@@ -62,9 +62,9 @@ check:
 | `errstring` | `err.Error()` compared with `==`, `!=`, `switch` or a `strings` matcher, outside tests | A sentinel with `errors.Is`, or a typed error with `errors.As` |
 | `noskipenv` | A test that skips silently: any `Skip` not guarded by `testing.Short()`, an opt-out variable or a platform check | `t.Fatal` when the environment is missing; skip only under `testing.Short()`, an opt-out variable whose name has a `SKIP` token (`STORE_SKIP_INTEGRATION=1`), or `runtime.GOOS`/`GOARCH` |
 | `doccomment` | An exported symbol without a doc comment, a doc comment over two lines, a doc comment on an unexported symbol, and any other comment | Name things so the code reads without comments; keep two lines on exported symbols |
-| `adrref` | A design-record id (`ADR-12`) or a record folder path (`docs/adr/`) in a comment or string literal | State the behaviour; keep records outside the repository |
+| `adrref` | A design-record id (`ADR-12`) or a record folder path (`docs/adr/`) in a Go comment or string literal, or in a `.proto` comment | State the behaviour; keep records outside the repository; fix `.proto` sources, then regenerate |
 
-Exempt from `clockseam` and `envroot`: `main` packages, `app/` and `cmd/`, `_test.go` files, and test-kit packages whose name ends in `test`. `doccomment` allows directives (`//go:`, `//nolint:`, build tags), example `// Output:` blocks, generated files, comments above the `package` clause, and two-line doc comments on struct fields and interface methods. `noskipenv` exempts the re-exec idiom, a test function named `*HelperProcess`.
+Exempt from `clockseam` and `envroot`: `main` packages, `app/` and `cmd/`, `_test.go` files, and test-kit packages whose name ends in `test`. `doccomment` allows directives (`//go:`, `//nolint:`, build tags), example `// Output:` blocks, generated files, comments above the `package` clause, and two-line doc comments on struct fields and interface methods. `noskipenv` exempts the re-exec idiom, a test function named `*HelperProcess`. `adrref` skips generated Go files (a `Code generated ... DO NOT EDIT.` header, such as `.pb.go`) and instead reads every `.proto` file of each analyzed module, skipping `testdata/`, `vendor/`, `node_modules/`, dot and underscore folders and nested modules.
 
 Run only some analyzers with their flags, for example `vlint -layout -errstring ./...`, or all but one with `-clockseam=false`. `vlint help` lists them. Files behind a build tag are analyzed only when the tag is set: `vlint -tags integration ./...` (comma-separated, passed to package loading). `vlint` exits 3 on findings and 1 when a package fails to load or type-check.
 
@@ -75,6 +75,17 @@ go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 fix ./...
 ```
 
 It runs `golangci-lint run --fix --enable-only errorlint` and then `golangci-lint fmt` (gofmt and goimports). Turning `%v` into `%w` makes wrapped errors visible to `errors.Is`, so run the tests afterwards.
+
+### The "don't get worse" gate
+
+A repository that cannot reach zero findings in one change commits a baseline and fails only on new findings:
+
+```sh
+vlint -baseline lint/vlint-baseline.txt -write ./...   # record today's findings
+vlint -baseline lint/vlint-baseline.txt ./...          # in make check
+```
+
+Each baseline line is the module-relative file, the analyzer, a hash of the reported source line (whitespace collapsed) and the message. There is no line number, so edits elsewhere in a file do not disturb it; editing the reported line itself makes its finding new, which asks for the fix. Repeated identical lines count one finding each. The check prints `N new findings`, exits 3 when N > 0, and lists the entries that no longer occur as `fixed:` without failing; rerun with `-write` to shrink the file. Use the same flags (`-tags`, analyzer flags) when writing and checking. A package that fails to load fails the run, so a broken tree never passes as clean.
 
 ### The folder layout
 
