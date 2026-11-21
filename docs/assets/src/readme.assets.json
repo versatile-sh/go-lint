@@ -1,0 +1,216 @@
+{
+  "name": "go-lint",
+  "pitch": [
+    "One lint kit for ",
+    "every Go repository",
+    "."
+  ],
+  "sub": "The same rules, the same config, checked the same way everywhere.",
+  "badge": "MIT",
+  "tags": [
+    "golangci-lint config",
+    "drift check",
+    "7 analyzers",
+    "safe fixes only",
+    "go run, no install"
+  ],
+  "heroLabel": "go-lint: one lint kit for every Go repository. The same rules, the same config, checked the same way everywhere.",
+  "sections": [
+    [
+      "what-it-is",
+      "overview",
+      "What it ",
+      "is"
+    ],
+    [
+      "how-it-works",
+      "overview",
+      "How it ",
+      "works"
+    ],
+    [
+      "quick-start",
+      "start here",
+      "Quick ",
+      "start"
+    ],
+    [
+      "usage",
+      "use",
+      "Rules, the gate and ",
+      "the layout"
+    ],
+    [
+      "configuration",
+      "configure",
+      "Configure the ",
+      "overlay"
+    ],
+    [
+      "development-and-tests",
+      "develop",
+      "Development and ",
+      "tests"
+    ],
+    [
+      "security-notes",
+      "project",
+      "Security ",
+      "notes"
+    ],
+    [
+      "contributing",
+      "project",
+      "",
+      "Contributing"
+    ],
+    [
+      "license",
+      "project",
+      "",
+      "License"
+    ]
+  ],
+  "diagrams": [
+    {
+      "slug": "gate",
+      "kind": "pipeline",
+      "why": "The check is three ordered steps of one command, and each one fails the build on its own, so a pipeline is its real shape.",
+      "label": "How go-lint runs. Your repository's check command calls vlint, pinned in mise.toml, in three steps. First vlint golangci -check builds .golangci.yml from the shared config plus your overlay and fails when the committed file drifts. Then vlint ./... runs the seven analyzers: layout, clockseam, envroot, errstring, noskipenv, doccomment and adrref. Last, golangci-lint runs with the generated config. Any step that finds something fails the check.",
+      "gap": 96,
+      "cards": [
+        {
+          "title": "1 config",
+          "sub": "vlint golangci -check",
+          "rows": [
+            "shared.yml",
+            "+ your overlay",
+            ".golangci.yml",
+            [
+              "fails on drift",
+              "accent"
+            ]
+          ]
+        },
+        {
+          "title": "2 analyzers",
+          "sub": "vlint ./...",
+          "weight": 1.15,
+          "rows": [
+            [
+              "layout",
+              "accent"
+            ],
+            "clockseam, envroot",
+            "errstring, noskipenv",
+            "doccomment, adrref"
+          ]
+        },
+        {
+          "title": "3 linters",
+          "sub": "golangci-lint run",
+          "rows": [
+            "stock linters",
+            "generated config",
+            [
+              "errorlint, fmt",
+              "muted"
+            ]
+          ]
+        }
+      ],
+      "arrows": [
+        {
+          "label": "in sync",
+          "accent": true
+        },
+        {
+          "label": "clean",
+          "accent": true
+        }
+      ],
+      "footer": {
+        "title": "mise run check",
+        "sub": "any finding fails",
+        "under": 1,
+        "label": "one command"
+      }
+    },
+    {
+      "slug": "layout",
+      "kind": "layers",
+      "why": "The layout analyzer enforces an import direction between folders, which is a stack of layers, not a flow.",
+      "label": "The folder layout the layout analyzer enforces. app and cmd are the composition root: configuration, wiring and the real clock; only they may import everything. service holds the operations over core and ports, next to the adapters, one folder per driver such as store and server. core holds pure rules with no I/O. port is the contract: interfaces, sentinel errors and the coded error type. schema and api hold the contract data. Each layer imports only the layers below it.",
+      "bands": [
+        {
+          "title": "cmd, app",
+          "sub": "composition root",
+          "items": [
+            "configuration",
+            "wiring",
+            "real clock"
+          ]
+        },
+        {
+          "title": "service, adapters",
+          "sub": "anything but app, cmd",
+          "items": [
+            "service/",
+            "store/",
+            "server/",
+            [
+              "one per driver",
+              "muted"
+            ]
+          ]
+        },
+        {
+          "title": "core",
+          "sub": "pure rules",
+          "items": [
+            [
+              "no I/O",
+              "accent"
+            ],
+            "domain rules"
+          ]
+        },
+        {
+          "title": "port",
+          "sub": "the contract",
+          "items": [
+            "interfaces",
+            "sentinel errors",
+            "coded error"
+          ]
+        },
+        {
+          "title": "schema, api",
+          "sub": "contract data",
+          "items": [
+            "generated types",
+            [
+              "own subtree",
+              "muted"
+            ]
+          ]
+        }
+      ],
+      "arrows": [
+        {
+          "label": "imports down only",
+          "accent": true
+        },
+        {
+          "label": "imports"
+        },
+        {
+          "label": "imports"
+        },
+        {
+          "label": "imports"
+        }
+      ]
+    }
+  ]
+}
