@@ -8,5 +8,5 @@ import (
 )
 
 func TestAnalyzer(t *testing.T) {
-	analysistest.Run(t, analysistest.TestData(), clockseam.Analyzer, "example.com/m/...")
+	analysistest.Run(t, analysistest.TestData(), clockseam.Analyzer, "example.com/m/...", "example.com/worldclock")
 }
