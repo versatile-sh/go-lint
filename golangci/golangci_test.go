@@ -40,6 +40,24 @@ func TestGenerateMergesOverlay(t *testing.T) {
 	}
 }
 
+func TestGenerateAddsMergeBaseOnlyWhenSet(t *testing.T) {
+	plain, err := golangci.Generate([]byte(overlay))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(plain), "new-from-merge-base") {
+		t.Fatal("an overlay without issues must not set a merge base")
+	}
+	gated, err := golangci.Generate([]byte(overlay + "issues:\n  new-from-merge-base: origin/main\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := strings.Replace(string(plain), "  max-same-issues: 0\n", "  max-same-issues: 0\n  new-from-merge-base: origin/main\n", 1)
+	if string(gated) != want {
+		t.Fatalf("gated config differs from the plain one by more than the merge base:\n%s", gated)
+	}
+}
+
 func TestGenerateRejectsUnknownOverlayKeys(t *testing.T) {
 	if _, err := golangci.Generate([]byte("linters:\n  enable: [wsl]\n")); err == nil {
 		t.Fatal("an overlay that enables linters must be refused")
