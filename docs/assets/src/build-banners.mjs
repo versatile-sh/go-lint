@@ -11,9 +11,7 @@ const spec = JSON.parse(readFileSync(join(here, "readme.assets.json"), "utf8"));
 
 const font = (pkg, file) => {
   const buf = readFileSync(require.resolve(`@fontsource/${pkg}/files/${file}`));
-  const parsed = opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
-  parsed.tables.gsub.features = parsed.tables.gsub.features.filter((f) => f.tag !== "ccmp");
-  return parsed;
+  return opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
 };
 const serif = font("instrument-serif", "instrument-serif-latin-400-normal.woff");
 const italic = font("instrument-serif", "instrument-serif-latin-400-italic.woff");
@@ -38,7 +36,7 @@ const reset = () => {
   glyphs = new Map();
 };
 const glyphId = (f, glyph, size) => {
-  const key = `${f.names.windows.fullName.en}|${size}|${glyph.index}`;
+  const key = `${f.names.fullName.en}|${size}|${glyph.index}`;
   if (!glyphs.has(key)) glyphs.set(key, { id: `g${glyphs.size}`, d: glyph.getPath(0, 0, size).toPathData(size >= 30 ? 0 : 1) });
   return glyphs.get(key);
 };
