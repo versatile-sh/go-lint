@@ -24,7 +24,8 @@ const (
 // ErrDrift is returned by Check when the committed config differs from the generated one.
 var ErrDrift = errors.New("config out of date")
 
-// Overlay is the only part a repository adds: extra exclusion rules and extra depguard rules.
+// Overlay is the only part a repository adds: extra exclusion and depguard rules, and an optional merge base
+// so that golangci-lint reports only issues on lines changed since that ref.
 type Overlay struct {
 	Exclusions struct {
 		Rules []yaml.Node `yaml:"rules"`
@@ -32,6 +33,9 @@ type Overlay struct {
 	Depguard struct {
 		Rules yaml.Node `yaml:"rules"`
 	} `yaml:"depguard"`
+	Issues struct {
+		NewFromMergeBase string `yaml:"new-from-merge-base"`
+	} `yaml:"issues"`
 }
 
 // Generate returns the shared config merged with the overlay, headed by a generated-file marker.
@@ -54,6 +58,11 @@ func Generate(overlay []byte) ([]byte, error) {
 		}
 		if err := mergeDepguard(lookup(root, "linters", "settings", "depguard", "rules"), &o.Depguard.Rules); err != nil {
 			return nil, err
+		}
+		if ref := o.Issues.NewFromMergeBase; ref != "" {
+			issues := lookup(root, "issues")
+			issues.Content = append(issues.Content,
+				&yaml.Node{Kind: yaml.ScalarNode, Value: "new-from-merge-base"}, &yaml.Node{Kind: yaml.ScalarNode, Value: ref})
 		}
 	}
 	var buf bytes.Buffer
