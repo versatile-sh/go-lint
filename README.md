@@ -36,15 +36,15 @@ go-lint is a versioned Go module with one command, `vlint`. A repository runs it
 From the root of a Go module, with Go 1.27 and golangci-lint 2.15:
 
 ```sh
-go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.0 golangci
-go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.0 ./...
+go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 golangci
+go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 ./...
 golangci-lint run ./...
 ```
 
 The first line writes `.golangci.yml`. The second prints one line per finding as `file:line:col: message` and exits non-zero when there is any. Wire both into the check command:
 
 ```make
-VLINT := go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.0
+VLINT := go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1
 
 check:
 	$(VLINT) golangci -check
@@ -64,14 +64,14 @@ check:
 | `doccomment` | An exported symbol without a doc comment, a doc comment over two lines, a doc comment on an unexported symbol, and any other comment | Name things so the code reads without comments; keep two lines on exported symbols |
 | `adrref` | A design-record id (`ADR-12`) or a record folder path (`docs/adr/`) in a comment or string literal | State the behaviour; keep records outside the repository |
 
-Exempt from `clockseam` and `envroot`: `main` packages, `app/` and `cmd/`, `_test.go` files, and test-kit packages whose name ends in `test`. `doccomment` allows directives (`//go:`, `//nolint:`, build tags), generated files, comments above the `package` clause, and two-line doc comments on struct fields and interface methods. `noskipenv` exempts the re-exec idiom, a test function named `*HelperProcess`.
+Exempt from `clockseam` and `envroot`: `main` packages, `app/` and `cmd/`, `_test.go` files, and test-kit packages whose name ends in `test`. `doccomment` allows directives (`//go:`, `//nolint:`, build tags), example `// Output:` blocks, generated files, comments above the `package` clause, and two-line doc comments on struct fields and interface methods. `noskipenv` exempts the re-exec idiom, a test function named `*HelperProcess`.
 
 Run one analyzer with its flag, for example `vlint -layout ./...`. `vlint help` lists them. Files behind a build tag are analyzed only when the tag is set: `GOFLAGS=-tags=integration vlint ./...`.
 
 Apply the safe fixes only:
 
 ```sh
-go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.0 fix ./...
+go run github.com/versatile-sh/go-lint/cmd/vlint@v0.1.1 fix ./...
 ```
 
 It runs `golangci-lint run --fix --enable-only errorlint` and then `golangci-lint fmt` (gofmt and goimports). Turning `%v` into `%w` makes wrapped errors visible to `errors.Is`, so run the tests afterwards.

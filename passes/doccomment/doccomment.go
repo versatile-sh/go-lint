@@ -22,6 +22,8 @@ const maxLines = 2
 
 var directive = regexp.MustCompile(`^(//(go:|line |export |extern |[a-z0-9]+:\S)|// ?\+build )`)
 
+var exampleOutput = regexp.MustCompile(`^//\s*(Unordered output|Output):`)
+
 type checker struct {
 	pass *analysis.Pass
 	test bool
@@ -49,7 +51,7 @@ func (c *checker) file(f *ast.File) {
 		}
 	}
 	for _, cg := range f.Comments {
-		if c.seen[cg] || cg.End() < f.Package || allDirectives(cg) {
+		if c.seen[cg] || cg.End() < f.Package || allDirectives(cg) || exampleOutput.MatchString(cg.List[0].Text) {
 			continue
 		}
 		c.pass.Reportf(cg.Pos(), "inline comment: delete it, or fold real knowledge into the doc comment of an exported symbol")
