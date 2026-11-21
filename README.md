@@ -66,7 +66,7 @@ check:
 
 Exempt from `clockseam` and `envroot`: `main` packages, `app/` and `cmd/`, `_test.go` files, and test-kit packages whose name ends in `test`. `doccomment` allows directives (`//go:`, `//nolint:`, build tags), example `// Output:` blocks, generated files, comments above the `package` clause, and two-line doc comments on struct fields and interface methods. `noskipenv` exempts the re-exec idiom, a test function named `*HelperProcess`.
 
-Run one analyzer with its flag, for example `vlint -layout ./...`. `vlint help` lists them. Files behind a build tag are analyzed only when the tag is set: `GOFLAGS=-tags=integration vlint ./...`.
+Run only some analyzers with their flags, for example `vlint -layout -errstring ./...`, or all but one with `-clockseam=false`. `vlint help` lists them. Files behind a build tag are analyzed only when the tag is set: `vlint -tags integration ./...` (comma-separated, passed to package loading). `vlint` exits 3 on findings and 1 when a package fails to load or type-check.
 
 Apply the safe fixes only:
 
@@ -132,8 +132,10 @@ Open an issue or a pull request. A new rule comes with its analyzer, its `analys
 
 ## License
 
-Copyright (C) 2026 Versatile (versatile.sh).
+Copyright (C) 2026 Versatile (versatile.sh)
 
-go-lint is free software: you can redistribute it and modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed without any warranty; see [`LICENSE`](LICENSE) for the full terms.
+go-lint is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE).
 
-A commercial license, for use under terms other than the GPL, is available from Versatile at <https://versatile.sh>.
+For a commercial licence without the GPL's obligations, contact Versatile through [versatile.sh/contact](https://versatile.sh/contact).
+
+Contributions are accepted under the CLA, see [CONTRIBUTING.md](CONTRIBUTING.md).
