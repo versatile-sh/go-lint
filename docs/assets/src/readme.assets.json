@@ -1,0 +1,69 @@
+{
+  "name": "go-lint",
+  "pitch": ["One lint kit for ", "every Go repository", "."],
+  "sub": "The same rules, the same config, checked the same way everywhere.",
+  "badge": "GPL-3.0-or-later",
+  "tags": ["golangci-lint config", "drift check", "7 analyzers", "safe fixes only", "go run, no install"],
+  "heroLabel": "go-lint: one lint kit for every Go repository. The same rules, the same config, checked the same way everywhere.",
+  "sections": [
+    ["what-it-is", "overview", "What it ", "is"],
+    ["how-it-works", "overview", "How it ", "works"],
+    ["quick-start", "start here", "Quick ", "start"],
+    ["usage", "use", "Rules, the gate and ", "the layout"],
+    ["configuration", "configure", "Configure the ", "overlay"],
+    ["development-and-tests", "develop", "Development and ", "tests"],
+    ["security-notes", "project", "Security ", "notes"],
+    ["contributing", "project", "", "Contributing"],
+    ["license", "project", "", "License"]
+  ],
+  "diagrams": [
+    {
+      "slug": "flow",
+      "label": "How go-lint runs. Your repository's check command calls vlint through go run at a pinned version. vlint golangci writes .golangci.yml from the shared config plus your overlay, and vlint golangci -check fails when the committed file drifts. vlint ./... runs the seven analyzers: layout, clockseam, envroot, errstring, noskipenv, doccomment and adrref. golangci-lint then runs with the generated config.",
+      "cards": [
+        {
+          "title": "Your repo",
+          "sub": "make check",
+          "rows": [
+            "go.mod",
+            ["lint/", "muted"],
+            ["  golangci.local.yml", "muted"],
+            ".golangci.yml"
+          ]
+        },
+        {
+          "title": "vlint",
+          "sub": "go run …/cmd/vlint@vX",
+          "weight": 1.4,
+          "rows": [
+            ["layout", "accent"],
+            "clockseam · envroot",
+            "errstring · noskipenv",
+            "doccomment · adrref",
+            "golangci [-check]",
+            ["fix: errorlint + fmt", "muted"]
+          ]
+        },
+        {
+          "title": "Results",
+          "sub": "fail the check",
+          "rows": [
+            "findings",
+            ".golangci.yml",
+            "drift error",
+            ["golangci-lint run", "muted"]
+          ]
+        }
+      ],
+      "arrows": [
+        {
+          "label": "./..."
+        },
+        {
+          "label": "zero",
+          "accent": true
+        }
+      ]
+    }
+  ]
+}

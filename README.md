@@ -1,15 +1,32 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-hero-dark.svg">
-  <img src="docs/assets/banner-hero-light.svg" alt="go-lint: one lint kit for every Versatile Go repository. The same rules, the same config, checked the same way everywhere." width="100%">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-hero-dark.svg">
+    <img src="docs/assets/banner-hero-light.svg" alt="go-lint: one lint kit for every Go repository. The same rules, the same config, checked the same way everywhere." width="100%">
+  </picture>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue" alt="License: GPL-3.0-or-later"></a>
+  <a href="go.mod"><img src="https://img.shields.io/badge/go-1.27-00ADD8" alt="Go 1.27"></a>
+</p>
+
+<p align="center">
+  <b><a href="#quick-start">Quick start</a></b> &nbsp;·&nbsp;
+  <b><a href="#usage">Rules</a></b> &nbsp;·&nbsp;
+  <a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
+  <a href="#the-folder-layout">Layout</a> &nbsp;·&nbsp;
+  <a href="#configuration">Configuration</a> &nbsp;·&nbsp;
+  <a href="#development-and-tests">Development</a>
+</p>
 
 One lint kit for Go repositories that follow the Versatile engineering standard: a generated golangci-lint config, a drift check for it, and seven analyzers for what stock linters cannot see.
 
-[Quick start](#quick-start) · [Rules](#usage) · [Layout](#the-folder-layout) · [Configuration](#configuration) · [Development](#development-and-tests) · [License](#license)
+<a id="what-it-is"></a>
 
-![license](https://img.shields.io/badge/license-GPL--3.0--or--later-c6f432) ![go](https://img.shields.io/badge/go-1.27-c6f432)
-
-## What it is
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-what-it-is-dark.svg">
+  <img src="docs/assets/section-what-it-is-light.svg" alt="What it is" width="100%">
+</picture>
 
 go-lint is a versioned Go module with one command, `vlint`. A repository runs it with `go run` at a pinned version, so nothing is added to its `go.mod` and every machine runs the same rules.
 
@@ -19,7 +36,12 @@ go-lint is a versioned Go module with one command, `vlint`. A repository runs it
 | Fail the check when the committed config drifts from the generated one | Let a repository enable extra linters or loosen shared settings |
 | Run seven `go/analysis` analyzers (layout, clock, environment, errors, tests, comments, design-record references) | Apply risky autofixes: only `errorlint` and the formatters |
 
-## How it works
+<a id="how-it-works"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-how-it-works-dark.svg">
+  <img src="docs/assets/section-how-it-works-light.svg" alt="How it works" width="100%">
+</picture>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/diagram-flow-dark.svg">
@@ -31,7 +53,12 @@ go-lint is a versioned Go module with one command, `vlint`. A repository runs it
 3. `vlint ./...` runs the analyzers over every package, test files included where a rule covers them.
 4. `golangci-lint run ./...` runs the stock linters with the generated config.
 
-## Quick start
+<a id="quick-start"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-quick-start-dark.svg">
+  <img src="docs/assets/section-quick-start-light.svg" alt="Quick start" width="100%">
+</picture>
 
 From the root of a Go module, with Go 1.27 and golangci-lint 2.15:
 
@@ -52,7 +79,12 @@ check:
 	golangci-lint run ./...
 ```
 
-## Usage
+<a id="usage"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-usage-dark.svg">
+  <img src="docs/assets/section-usage-light.svg" alt="Rules, the gate and the layout" width="100%">
+</picture>
 
 | Analyzer | Reports | Fix |
 | --- | --- | --- |
@@ -76,9 +108,7 @@ go run github.com/versatile-sh/go-lint/cmd/vlint@v0.2.0 fix ./...
 
 It runs `golangci-lint run --fix --enable-only errorlint` and then `golangci-lint fmt` (gofmt and goimports). Turning `%v` into `%w` makes wrapped errors visible to `errors.Is`, so run the tests afterwards.
 
-### The "don't get worse" gate
-
-A repository that cannot reach zero findings in one change commits a baseline and fails only on new findings:
+<a id="the-dont-get-worse-gate"></a>**The "don't get worse" gate.** A repository that cannot reach zero findings in one change commits a baseline and fails only on new findings:
 
 ```sh
 vlint -baseline lint/vlint-baseline.txt -write ./...   # record today's findings
@@ -96,9 +126,7 @@ issues:
 
 This gate is diff-based, not key-based: it needs the git history and the ref present locally (fetch `origin/main` in a shallow CI clone), and it checks nothing on the base branch itself. Run the full `golangci-lint run` when you want the whole debt.
 
-### The folder layout
-
-Paths are relative to the Go module root.
+<a id="the-folder-layout"></a>**The folder layout.** Paths are relative to the Go module root.
 
 | Folder | Role | May import from the module |
 | --- | --- | --- |
@@ -112,7 +140,12 @@ Paths are relative to the Go module root.
 
 Test files may import anything except `cmd/`. These folder names are reported wherever they appear at the root or under `internal/`: `domain`, `ports`, `application`, `adapters`, `adapter`, `bootstrap`, `infrastructure`, `infra`, `usecase`, `usecases`, `pkg`, `util`, `utils`, `common`, `helpers`, `shared`, `lib`. Layer folders sit at the module root, not under `internal/`. Finer edges between adapters belong to the repository's own dependency table.
 
-## Configuration
+<a id="configuration"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-configuration-dark.svg">
+  <img src="docs/assets/section-configuration-light.svg" alt="Configure the overlay" width="100%">
+</picture>
 
 A repository adds rules in `lint/golangci.local.yml`, then runs `vlint golangci` to regenerate. The overlay accepts three keys only, `exclusions`, `depguard` and `issues.new-from-merge-base` (see the gate above):
 
@@ -132,7 +165,12 @@ depguard:
 
 Any other key is refused, and a depguard rule may not reuse a shared rule's name. The shared config leaves `sloglint` autofix unused, and `nilnil` checks pointers, functions and channels only, so `(nil, nil)` from gRPC metadata stubs and `any` results is not reported.
 
-## Development and tests
+<a id="development-and-tests"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-development-and-tests-dark.svg">
+  <img src="docs/assets/section-development-and-tests-light.svg" alt="Development and tests" width="100%">
+</picture>
 
 ```sh
 make check   # gofmt, go vet, config drift, vlint on itself, golangci-lint
@@ -140,17 +178,32 @@ make test    # go test -race -count=1 ./...
 make images  # regenerate the README images in docs/assets
 ```
 
-Each analyzer has `analysistest` cases in `passes/<analyzer>/testdata`: every rule has a case that must be reported and a case that must not. The README images are generated by `docs/assets/src/build-banners.mjs`; never edit an SVG by hand.
+Each analyzer has `analysistest` cases in `passes/<analyzer>/testdata`: every rule has a case that must be reported and a case that must not. The README images are generated by `docs/assets/src/build-banners.mjs` from `docs/assets/src/readme.assets.json`; never edit an SVG by hand.
 
-## Security notes
+<a id="security-notes"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-security-notes-dark.svg">
+  <img src="docs/assets/section-security-notes-light.svg" alt="Security notes" width="100%">
+</picture>
 
 go-lint reads source files and `go.mod` files and writes only `.golangci.yml`. `vlint fix` runs the `golangci-lint` binary found on `PATH`. Report a vulnerability through a private GitHub security advisory on this repository, not a public issue.
 
-## Contributing
+<a id="contributing"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-contributing-dark.svg">
+  <img src="docs/assets/section-contributing-light.svg" alt="Contributing" width="100%">
+</picture>
 
 Open an issue or a pull request. A new rule comes with its analyzer, its `analysistest` cases and a row in the table above, and `make check` and `make test` pass.
 
-## License
+<a id="license"></a>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/section-license-dark.svg">
+  <img src="docs/assets/section-license-light.svg" alt="License" width="100%">
+</picture>
 
 Copyright (C) 2026 Versatile (versatile.sh)
 
