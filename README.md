@@ -44,8 +44,13 @@ go-lint is a versioned Go module with one command, `vlint`. A repository runs it
 </picture>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/diagram-flow-dark.svg">
-  <img src="docs/assets/diagram-flow-light.svg" alt="How go-lint runs. Your repository's check command calls vlint through go run at a pinned version. vlint golangci writes .golangci.yml from the shared config plus your overlay, and vlint golangci -check fails when the committed file drifts. vlint ./... runs the seven analyzers: layout, clockseam, envroot, errstring, noskipenv, doccomment and adrref. golangci-lint then runs with the generated config." width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/diagram-gate-dark.svg">
+  <img src="docs/assets/diagram-gate-light.svg" alt="How go-lint runs. Your repository&#x27;s check command calls vlint through go run at a pinned version, in three steps. First vlint golangci -check builds .golangci.yml from the shared config plus your overlay and fails when the committed file drifts. Then vlint ./... runs the seven analyzers: layout, clockseam, envroot, errstring, noskipenv, doccomment and adrref. Last, golangci-lint runs with the generated config. Any step that finds something fails the check." width="100%">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/diagram-layout-dark.svg">
+  <img src="docs/assets/diagram-layout-light.svg" alt="The folder layout the layout analyzer enforces. app and cmd are the composition root: configuration, wiring and the real clock; only they may import everything. service holds the operations over core and ports, next to the adapters, one folder per driver such as store and server. core holds pure rules with no I/O. port is the contract: interfaces, sentinel errors and the coded error type. schema and api hold the contract data. Each layer imports only the layers below it." width="100%">
 </picture>
 
 1. The repository's `make check` calls `vlint` with `go run github.com/versatile-sh/go-lint/cmd/vlint@<version>`.
