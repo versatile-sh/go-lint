@@ -86,7 +86,7 @@ func changedAnalyzers(patterns []string, tags, baselinePath string) int {
 }
 
 func changedGolangci(bin string, res changed.Result, s changed.Set, baseRef, tags string) int {
-	cfg := filepath.Join(res.Top, golangci.FastConfigFile)
+	cfg := findConfig(s.Dir, res.Top, golangci.FastConfigFile)
 	if _, err := os.Stat(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "vlint: %s missing: run vlint golangci\n", golangci.FastConfigFile)
 		return 1
