@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/versatile-sh/go-lint/golangci"
@@ -64,7 +65,7 @@ func lint(args []string) int {
 		return 0
 	}
 	run := selected(fs, only)
-	findings, err := driver.Run(run, fs.Args(), driver.Options{Tags: *tags, Tests: *tests})
+	findings, err := analyze(run, fs.Args(), driver.Options{Tags: *tags, Tests: *tests})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "vlint:", err)
 		return 1
@@ -102,6 +103,24 @@ func lint(args []string) int {
 		return 3
 	}
 	return 0
+}
+
+func analyze(run []*analysis.Analyzer, patterns []string, opts driver.Options) ([]driver.Finding, error) {
+	findings, modules, err := driver.Run(run, patterns, opts)
+	if err != nil || !slices.Contains(run, adrref.Analyzer) {
+		return findings, err
+	}
+	for _, m := range modules {
+		ps, err := adrref.Proto(m)
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range ps {
+			findings = append(findings, driver.Finding{Module: m, File: p.File, Line: p.Line, Col: p.Col, Analyzer: adrref.Analyzer.Name, Message: adrref.Message})
+		}
+	}
+	driver.Sort(findings)
+	return findings, nil
 }
 
 func selected(fs *flag.FlagSet, only map[*analysis.Analyzer]*bool) []*analysis.Analyzer {

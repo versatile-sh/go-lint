@@ -13,7 +13,7 @@ import (
 func run(t *testing.T, opts driver.Options, patterns ...string) []driver.Finding {
 	t.Helper()
 	t.Chdir(filepath.Join("testdata", "m"))
-	got, err := driver.Run([]*analysis.Analyzer{clockseam.Analyzer}, patterns, opts)
+	got, _, err := driver.Run([]*analysis.Analyzer{clockseam.Analyzer}, patterns, opts)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func TestRunPassesTagsToLoading(t *testing.T) {
 
 func TestRunFailsWhenNothingLoads(t *testing.T) {
 	t.Chdir(filepath.Join("testdata", "m"))
-	_, err := driver.Run([]*analysis.Analyzer{clockseam.Analyzer}, []string{"./missing/..."}, driver.Options{})
+	_, _, err := driver.Run([]*analysis.Analyzer{clockseam.Analyzer}, []string{"./missing/..."}, driver.Options{})
 	if !errors.Is(err, driver.ErrLoad) {
 		t.Fatalf("err = %v, want ErrLoad", err)
 	}

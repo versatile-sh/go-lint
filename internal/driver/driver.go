@@ -30,27 +30,28 @@ type Options struct {
 // ErrLoad is returned when a package fails to load or type-check, so no result is mistaken for a clean tree.
 var ErrLoad = errors.New("packages failed to load")
 
-// Run analyzes the packages matched by patterns and returns the sorted findings.
-func Run(analyzers []*analysis.Analyzer, patterns []string, opts Options) ([]Finding, error) {
+// Run analyzes the packages matched by patterns and returns the sorted findings and the sorted module roots seen.
+func Run(analyzers []*analysis.Analyzer, patterns []string, opts Options) ([]Finding, []string, error) {
 	cfg := &packages.Config{Mode: packages.LoadSyntax | packages.NeedModule, Tests: opts.Tests}
 	if opts.Tags != "" {
 		cfg.BuildFlags = []string{"-tags=" + opts.Tags}
 	}
 	pkgs, err := packages.Load(cfg, patterns...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrLoad, err)
+		return nil, nil, fmt.Errorf("%w: %w", ErrLoad, err)
 	}
 	if len(pkgs) == 0 {
-		return nil, fmt.Errorf("%w: %s matched no packages", ErrLoad, strings.Join(patterns, " "))
+		return nil, nil, fmt.Errorf("%w: %s matched no packages", ErrLoad, strings.Join(patterns, " "))
 	}
 	if n := packages.PrintErrors(pkgs); n > 0 {
-		return nil, fmt.Errorf("%w: %d errors", ErrLoad, n)
+		return nil, nil, fmt.Errorf("%w: %d errors", ErrLoad, n)
 	}
 	graph, err := checker.Analyze(analyzers, pkgs, nil)
 	if err != nil {
-		return nil, fmt.Errorf("analyze: %w", err)
+		return nil, nil, fmt.Errorf("analyze: %w", err)
 	}
 	seen := map[Finding]bool{}
+	modules := map[string]bool{}
 	var out []Finding
 	var errs []error
 	for _, act := range graph.Roots {
@@ -61,6 +62,7 @@ func Run(analyzers []*analysis.Analyzer, patterns []string, opts Options) ([]Fin
 		mod := ""
 		if act.Package.Module != nil {
 			mod = act.Package.Module.Dir
+			modules[mod] = true
 		}
 		for _, d := range act.Diagnostics {
 			p := act.Package.Fset.Position(d.Pos)
@@ -72,10 +74,15 @@ func Run(analyzers []*analysis.Analyzer, patterns []string, opts Options) ([]Fin
 		}
 	}
 	if len(errs) > 0 {
-		return nil, errors.Join(errs...)
+		return nil, nil, errors.Join(errs...)
 	}
 	Sort(out)
-	return out, nil
+	roots := make([]string, 0, len(modules))
+	for m := range modules {
+		roots = append(roots, m)
+	}
+	sort.Strings(roots)
+	return out, roots, nil
 }
 
 // Sort orders findings by file, position, analyzer and message.
