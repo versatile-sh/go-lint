@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue" alt="License: GPL-3.0-or-later"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
   <a href="go.mod"><img src="https://img.shields.io/badge/go-1.27-00ADD8" alt="Go 1.27"></a>
 </p>
 
@@ -205,10 +205,6 @@ Open an issue or a pull request. A new rule comes with its analyzer, its `analys
   <img src="docs/assets/section-license-light.svg" alt="License" width="100%">
 </picture>
 
-Copyright (C) 2026 Versatile (versatile.sh)
+Copyright (c) 2026 Versatile (versatile.sh)
 
-go-lint is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE).
-
-For a commercial licence without the GPL's obligations, contact Versatile through [versatile.sh/contact](https://versatile.sh/contact).
-
-Contributions are accepted under the CLA, see [CONTRIBUTING.md](CONTRIBUTING.md).
+go-lint is released under the [MIT License](LICENSE). Contributions are accepted under the same licence, see [CONTRIBUTING.md](CONTRIBUTING.md).

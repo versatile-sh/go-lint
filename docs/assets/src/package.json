@@ -1,6 +1,6 @@
 {
   "name": "readme-assets",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
