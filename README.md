@@ -71,6 +71,7 @@ From the root of a Go module, with Go 1.27, golangci-lint 2.15 and revive 1.17:
 
 ```sh
 vlint golangci          # writes .golangci.yml, .golangci-fast.yml and .revive.toml
+vlint golangci -out .config/lint   # same, in a folder; the overlay is read there as golangci.local.yml
 vlint ./...             # full tier: the analyzers on every package
 golangci-lint run ./... # full tier: the stock linters
 ```
@@ -198,7 +199,7 @@ Test files may import anything except `cmd/`. These folder names are reported wh
   <img src="docs/assets/section-configuration-light.svg" alt="Configure the overlay" width="100%">
 </picture>
 
-A repository adds rules in `lint/golangci.local.yml`, then runs `vlint golangci` to regenerate. The overlay accepts three keys only, `exclusions`, `depguard` and `issues.new-from-merge-base` (see the gate above):
+A repository adds rules in `lint/golangci.local.yml`, then runs `vlint golangci` to regenerate. With `-out <dir>` the files go to `<dir>` and the overlay is `<dir>/golangci.local.yml` (`vlint fast` and `vlint changed` find the configs in `.config/lint` too). The overlay accepts three keys only, `exclusions`, `depguard` and `issues.new-from-merge-base` (see the gate above):
 
 ```yaml
 exclusions:

@@ -140,3 +140,35 @@ func TestGenerateFastDropsOnlyTheHeavyLinters(t *testing.T) {
 		}
 	}
 }
+
+func TestWriteToPlacesFilesAndReadsOverlayInOut(t *testing.T) {
+	dir := t.TempDir()
+	out := filepath.Join(".config", "lint")
+	if err := golangci.CheckTo(dir, out); !errors.Is(err, golangci.ErrDrift) {
+		t.Fatalf("missing config: got %v, want ErrDrift", err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, out), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, out, golangci.OverlayName), []byte(overlay), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := golangci.WriteTo(dir, out); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{golangci.ConfigFile, golangci.FastConfigFile, golangci.ReviveFile} {
+		if _, err := os.Stat(filepath.Join(dir, out, name)); err != nil {
+			t.Fatalf("%s not written in out: %v", name, err)
+		}
+		if _, err := os.Stat(filepath.Join(dir, name)); err == nil {
+			t.Fatalf("%s leaked to the root", name)
+		}
+	}
+	got, err := os.ReadFile(filepath.Join(dir, out, golangci.ConfigFile))
+	if err != nil || !strings.Contains(string(got), "legacy/") {
+		t.Fatalf("overlay in out not merged: %v", err)
+	}
+	if err := golangci.CheckTo(dir, out); err != nil {
+		t.Fatalf("fresh config: %v", err)
+	}
+}

@@ -46,3 +46,17 @@ func TestFindConfigPrefersTheNearestModuleRoot(t *testing.T) {
 		t.Fatalf("got %s, want %s", got, want)
 	}
 }
+
+func TestFindConfigLooksInTheConfigFolder(t *testing.T) {
+	top := t.TempDir()
+	folder := filepath.Join(top, ".config", "lint")
+	if err := os.MkdirAll(folder, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(folder, ".revive.toml"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := findConfig(top, top, ".revive.toml"), filepath.Join(folder, ".revive.toml"); got != want {
+		t.Fatalf("got %s, want %s", got, want)
+	}
+}
