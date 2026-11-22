@@ -168,6 +168,9 @@ func TestWriteToPlacesFilesAndReadsOverlayInOut(t *testing.T) {
 	if err != nil || !strings.Contains(string(got), "legacy/") {
 		t.Fatalf("overlay in out not merged: %v", err)
 	}
+	if !strings.Contains(string(got), "Add repository rules to .config/lint/golangci.local.yml and regenerate.") {
+		t.Fatalf("header does not name the overlay in out:\n%s", got[:200])
+	}
 	if err := golangci.CheckTo(dir, out); err != nil {
 		t.Fatalf("fresh config: %v", err)
 	}
