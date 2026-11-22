@@ -147,12 +147,13 @@ func config(args []string) int {
 	fs := flag.NewFlagSet("golangci", flag.ExitOnError)
 	check := fs.Bool("check", false, "fail when the committed .golangci.yml differs from the generated one")
 	dir := fs.String("dir", ".", "repository root")
+	out := fs.String("out", "", "folder for the generated files and the overlay, relative to -dir (default: the root)")
 	_ = fs.Parse(args)
-	run := golangci.Write
+	run := golangci.WriteTo
 	if *check {
-		run = golangci.Check
+		run = golangci.CheckTo
 	}
-	if err := run(*dir); err != nil {
+	if err := run(*dir, *out); err != nil {
 		fmt.Fprintln(os.Stderr, "vlint:", err)
 		return 1
 	}

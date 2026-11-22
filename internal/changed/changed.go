@@ -71,7 +71,7 @@ func group(top string, files, gomods []string) []Set {
 		switch {
 		case base == "go.mod" || base == "go.sum" || base == "go.work":
 			whole[moduleOf(top, path.Dir(f), modules)] = true
-		case strings.HasPrefix(base, ".golangci") || base == ".revive.toml" || strings.HasPrefix(f, "lint/"):
+		case strings.HasPrefix(base, ".golangci") || base == ".revive.toml" || strings.HasPrefix(f, "lint/") || strings.HasPrefix(f, ".config/lint/"):
 			everything = true
 		case strings.HasSuffix(f, ".go") && !skipped(f):
 			dir := filepath.Join(top, path.Dir(f))

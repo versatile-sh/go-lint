@@ -106,18 +106,27 @@ var targets = []target{
 	{ReviveFile, func([]byte) ([]byte, error) { return revive, nil }},
 }
 
+// OverlayName is the overlay file name inside an output directory chosen with WriteTo or CheckTo.
+const OverlayName = "golangci.local.yml"
+
 // Write generates the full config, the fast config and the revive config for the repository at dir.
-func Write(dir string) error {
-	overlay, err := readOverlay(dir)
+func Write(dir string) error { return WriteTo(dir, "") }
+
+// WriteTo is Write with the three files placed in out, relative to dir. The overlay is read from out when it holds one.
+func WriteTo(dir, out string) error {
+	overlay, err := readOverlay(dir, out)
 	if err != nil {
 		return err
 	}
+	if err := os.MkdirAll(filepath.Join(dir, out), 0o750); err != nil {
+		return fmt.Errorf("create %s: %w", out, err)
+	}
 	for _, t := range targets {
-		out, err := t.gen(overlay)
+		body, err := t.gen(overlay)
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(filepath.Join(dir, t.name), out, 0o644); err != nil { //nolint:gosec // a committed config file is world-readable
+		if err := os.WriteFile(filepath.Join(dir, out, t.name), body, 0o644); err != nil { //nolint:gosec // a committed config file is world-readable
 			return fmt.Errorf("write %s: %w", t.name, err)
 		}
 	}
@@ -125,8 +134,11 @@ func Write(dir string) error {
 }
 
 // Check returns ErrDrift when a generated file of the repository is missing or differs from what this version generates.
-func Check(dir string) error {
-	overlay, err := readOverlay(dir)
+func Check(dir string) error { return CheckTo(dir, "") }
+
+// CheckTo is Check for files placed in out, relative to dir.
+func CheckTo(dir, out string) error {
+	overlay, err := readOverlay(dir, out)
 	if err != nil {
 		return err
 	}
@@ -135,7 +147,7 @@ func Check(dir string) error {
 		if err != nil {
 			return err
 		}
-		got, err := os.ReadFile(filepath.Join(dir, t.name)) //nolint:gosec // reads the repository the caller named
+		got, err := os.ReadFile(filepath.Join(dir, out, t.name)) //nolint:gosec // reads the repository the caller named
 		if err != nil || !bytes.Equal(got, want) {
 			return fmt.Errorf("%s: %w: run vlint golangci", t.name, ErrDrift)
 		}
@@ -143,7 +155,13 @@ func Check(dir string) error {
 	return nil
 }
 
-func readOverlay(dir string) ([]byte, error) {
+func readOverlay(dir, out string) ([]byte, error) {
+	if out != "" {
+		overlay, err := os.ReadFile(filepath.Join(dir, out, OverlayName)) //nolint:gosec // reads the repository the caller named
+		if err == nil || !errors.Is(err, os.ErrNotExist) {
+			return overlay, err
+		}
+	}
 	overlay, err := os.ReadFile(filepath.Join(dir, OverlayFile)) //nolint:gosec // reads the repository the caller named
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("read %s: %w", OverlayFile, err)
